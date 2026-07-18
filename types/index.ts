@@ -1,25 +1,29 @@
 // ===== INTERFACES =====
 // An interface defines the SHAPE of an object -- what fields it must have.
 export interface User {
-id: number;
-name: string;
-email: string;
-role: "student" | "admin" | "instructor"; // only these values
-isActive: boolean;
+  id:       number;
+  name:     string;
+  email:    string;
+  role:     "student" | "security_admin";
+  isActive: boolean;
 }
-export interface Course {
-code: string;
-title: string;
-units: number;
-semester: string;
+
+export interface Item {
+  id:          number;
+  description: string;
+  location:    string;
+  type:        "lost" | "found";
+  reportedBy:  number;
+  reportedAt:  Date;
+  status:      ItemStatus;    
 }
-export interface Submission {
-id: number;
-studentId: number;
-courseCode: string;
-repoUrl: string;
-submittedAt: Date;
-score?: number; // ? means this field is optional
+
+export interface Claim {
+  id:          number;
+  itemId:      number;
+  claimantId:  number;
+  submittedAt: Date;
+  status:      ClaimStatus;   
 }
 
 // ===== TYPE ALIASES =====
@@ -49,16 +53,29 @@ console.log(`ID: ${id}`);
 }
 printId(101);
 printId("S2026-001");
-// ===== INTERSECTION TYPES -- combines ALL properties =====
-// StudentWithCourse must have all User fields AND enrolledCourse AND gpa
-export type StudentWithCourse = User & {
-enrolledCourse: Course;
-gpa: number;
-};
-const topStudent: StudentWithCourse = {
-id: 1, name: "Maria Santos", email: "m@example.com",
-role: "student", isActive: true,
-enrolledCourse: { code: "ITELECT4", title: "IT Elective 4", units: 3, semester: "1st" },
-gpa: 1.25,
-};
 
+// ===== ENUMS =====
+export enum ItemStatus {
+  Open,
+  Claimed,
+  Resolved,
+}
+
+export const enum ClaimStatus {
+  Pending  = "pending",
+  Verified = "verified",
+  Rejected = "rejected",
+}
+
+// ===== GENERIC INTERFACE =====
+export interface ApiResponse<T> {
+  success: boolean;
+  data:    T;
+  message?: string;
+}
+
+// ===== UTILITY TYPES =====
+export type ItemUpdate    = Partial<Item>;
+export type ItemPreview   = Pick<Item, "id" | "description" | "status">;
+export type PublicItem    = Omit<Item, "reportedBy">;
+export type ItemTypeCount = Record<"lost" | "found", number>;

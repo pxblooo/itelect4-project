@@ -1,4 +1,6 @@
-import type { User, Course, Submission } from "../types/index";
+import type { User, Item, Claim, ApiResponse, ItemUpdate, ItemPreview, PublicItem, ItemTypeCount, StringOrNumber } from "../types/index";
+
+import { ItemStatus, ClaimStatus } from "../types/index";
 
 // ===== PRIMITIVE TYPE ANNOTATIONS =====
 // Variables with explicit types
@@ -43,17 +45,28 @@ email: "juan@example.com",
 role: "student",
 isActive: true,
 };
-const course: Course = {
-code: "ITELECT4",
-title: "IT Elective 4",
-units: 3,
-semester: "1st Semester 2026-2027",
+const admin: User = {
+  id: 1,
+  name: "Security Office",
+  email: "security@campus.edu",
+  role: "security_admin",
+  isActive: true,
 };
-console.log(student);
-console.log(course);
 
-// ===== TYPE NARROWING =====
-import type { StringOrNumber } from "../types/index";
+const item: Item = {
+  id: 1,
+  description: "Black umbrella left in Room 302",
+  location: "Room 302",
+  type: "found",
+  reportedBy: admin.id,
+  reportedAt: new Date(),
+  status: ItemStatus.Open,
+};
+
+console.log(student);
+console.log(item);
+
+
 // Narrowing with typeof
 // Without the if-check, TypeScript would error:
 // Property 'toUpperCase' does not exist on type 'number'
@@ -74,3 +87,41 @@ return value; // TypeScript knows: it's a string
 console.log(processInput("hello")); // HELLO
 console.log(processInput(3.14159)); // 3.14
 console.log(formatDate(new Date())); // e.g. 7/4/2026
+
+// ===== GENERIC FUNCTIONS =====
+function getFirst<T>(items: T[]): T | undefined {
+  return items[0];
+}
+
+function getById<T extends { id: number }>(items: T[], id: number): T | undefined {
+  return items.find((i) => i.id === id);
+}
+
+const firstItem = getFirst<Item>([item]);
+const foundItem = getById<Item>([item], 1);
+console.log(firstItem?.description);
+console.log(foundItem?.location);
+
+// ===== GENERIC INTERFACE IN USE =====
+const itemResponse: ApiResponse<Item> = {
+  success: true,
+  data: item,
+};
+console.log(itemResponse.data.location);
+
+// ===== UTILITY TYPES IN USE =====
+const patch: ItemUpdate = { status: ItemStatus.Claimed };
+const preview: ItemPreview = { id: 1, description: "Black umbrella", status: ItemStatus.Open };
+const typeCount: ItemTypeCount = { lost: 3, found: 5 };
+
+// ===== ENUMS IN USE =====
+console.log(ItemStatus[item.status]); // "Open"
+
+const claim: Claim = {
+  id: 1,
+  itemId: item.id,
+  claimantId: student.id,
+  submittedAt: new Date(),
+  status: ClaimStatus.Pending,
+};
+console.log(claim.status); // "pending"
