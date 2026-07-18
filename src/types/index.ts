@@ -1,4 +1,4 @@
-// ===== INTERFACES =====
+﻿// ===== INTERFACES =====
 // An interface defines the SHAPE of an object -- what fields it must have.
 export interface User {
   id:       number;
